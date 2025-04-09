@@ -27,7 +27,7 @@ jobs:
   build:
     name: Build and Publish
     # Reference to the centralized workflow in the actions repository
-    uses: merkata/release-serve/.github/workflows/nodejs-build.yml@main
+    uses: merkata/release-serve/.github/workflows/maven-build.yml@main
     with:
       java_version: '17'
       maven_goals: 'clean package'

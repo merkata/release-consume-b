@@ -1,0 +1,43 @@
+name: Release CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop, 'feature/*', 'bugfix/*', 'release/*' ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+    inputs:
+      version_strategy:
+        description: 'Version strategy override (auto, major, minor, patch)'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - major
+          - minor
+          - patch
+      prerelease:
+        description: 'Prerelease identifier (leave empty for none)'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  build:
+    name: Build and Publish
+    # Reference to the centralized workflow in the actions repository
+    uses: your-org/actions-repo/.github/workflows/maven-build.yml@main
+    with:
+      java_version: '17'
+      maven_goals: 'clean package'
+      version_strategy: ${{ github.event.inputs.version_strategy || 'auto' }}
+      prerelease: ${{ github.event.inputs.prerelease || '' }}
+      publish_artifact: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release/') }}
+      #containerize: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release/') }}
+      containerize: false
+    #secrets:
+      #artifactory_username: ${{ secrets.ARTIFACTORY_USERNAME }}
+      #artifactory_password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+      #aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
